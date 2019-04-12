@@ -3,7 +3,7 @@ A Simple Python tool designed for users to rename and group meshes for exporting
 
 This tool has been originally desinged to help students, and others just getting into the flow of using Substance Painter and the workflow of naming meshes correctly to use the "By Mesh Name" baking option within Painter.
 
-### Installation:
+## Installation:
 
 Video Installation Instructions : {Coming soon}
 
@@ -20,7 +20,7 @@ Video Installation Instructions : {Coming soon}
 
 
 
-### Instructions for Use.
+## Instructions for Use.
 This section will outline what all the buttons will do within the tool. 
 Video demonstration : {Coming Soon}
 
