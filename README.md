@@ -16,8 +16,9 @@ Video Installation Instructions : {Coming soon}
 ```
 3. Enjoy the functionality and sorting powers of High Low Expo.
 
-<br\>
-<br\>
+
+
+
 
 ### Instructions for Use.
 This section will outline what all the buttons will do within the tool. 
