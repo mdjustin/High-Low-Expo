@@ -7,7 +7,7 @@ This tool has been originally desinged to help students, and others just getting
 
 Video Installation Instructions : {Coming soon}
 
-1. To install this scrip, place the high_low_expo.py file within your Maya's script directory. 
+1. To install this script, place the high_low_expo.py file within your Maya's script directory. 
 2. Inside maya, create a new shelf button set to python with the script :
 ```
   from high_low_expo import HighLowDialog
