@@ -51,6 +51,8 @@ class HighLowDialog(QtWidgets.QDialog):
     def create_widgets(self):
         self.layer_btn = QtWidgets.QPushButton("Create High/Low Layers")
         self.rename_le = QtWidgets.QLineEdit("")
+        self.high_Suffix = QtWidgets.QLineEdit("_high")
+        self.low_Suffix = QtWidgets.QLineEdit("_low")
         self.high_btn = QtWidgets.QPushButton("Make High")
         self.low_btn = QtWidgets.QPushButton("Make Low")
         self.addh_btn = QtWidgets.QPushButton("Set High")
@@ -86,6 +88,10 @@ class HighLowDialog(QtWidgets.QDialog):
         button_layout = QtWidgets.QHBoxLayout()
         button_layout.addWidget(self.high_btn)
         button_layout.addWidget(self.low_btn)
+
+        suffix_layout = QtWidgets.QHBoxLayout()
+        suffix_layout.addWidget(self.high_Suffix)
+        suffix_layout.addWidget(self.low_Suffix)
         
         rename_layout = QtWidgets.QHBoxLayout()
         rename_layout.addWidget(self.rename_le)
@@ -107,6 +113,7 @@ class HighLowDialog(QtWidgets.QDialog):
         
         form_layout = QtWidgets.QFormLayout()
         form_layout.addRow("Rename:", rename_layout)
+        form_layout.addRow("Suffixes:", suffix_layout)
         form_layout.addRow(button_layout)
         form_layout.addRow(addbtn_layout)
         form_layout.addRow("", toggle_layout)
@@ -124,6 +131,7 @@ class HighLowDialog(QtWidgets.QDialog):
         main_layout.addWidget(self.layer_btn)
         main_layout.addLayout(rename_layout)
         main_layout.addLayout(button_layout)
+        main_layout.addLayout(suffix_layout)
         main_layout.addLayout(addbtn_layout)
         main_layout.addLayout(toggle_layout)
         main_layout.addLayout(file_path_layout)
@@ -156,12 +164,13 @@ class HighLowDialog(QtWidgets.QDialog):
     def high_rename(self):
         selection = cmds.ls(sl=1, o=1)
         mesh_name = self.rename_le.text()
+        high_Suf = self.high_Suffix.text()
         if len(selection) < 1:
             cmds.warning("No mesh selected")
         elif len(selection) > 1:
             cmds.warning("Too many meshes selected")
         else:
-            cmds.rename(mesh_name + "_high")
+            cmds.rename(mesh_name + high_Suf)
             Name = cmds.ls(sl=1, o=1)
             cmds.editDisplayLayerMembers('High_Poly', Name , noRecurse=True)
             Name = cmds.ls(sl=1, o=1)
@@ -171,12 +180,13 @@ class HighLowDialog(QtWidgets.QDialog):
     def low_rename(self):
         selection = cmds.ls(sl=1, o=1)
         mesh_name = self.rename_le.text()
+        low_suf = self.low_Suffix.text()
         if len(selection) < 1:
             cmds.warning("No mesh selected")
         elif len(selection) > 1:
             cmds.warning("Too many meshes selected")
         else:
-            cmds.rename(mesh_name + "_low")
+            cmds.rename(mesh_name + low_suf)
             Name = cmds.ls(sl=1, o=1)
             cmds.editDisplayLayerMembers('Low_Poly', Name , noRecurse=True)
             Name = cmds.ls(sl=1, o=1)
@@ -249,4 +259,4 @@ if __name__ == "__main__":
         pass        
         
         open_import_dialog = HighLowDialog()
-        open_import_dialog.show()
+open_import_dialog.show()
