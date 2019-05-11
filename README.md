@@ -28,7 +28,7 @@ Video demonstration : {Coming Soon}
 
 ***Rename text box*** - This is where you can enter a custom name for your mesh. 
 
-***Rename text box*** - Allows you to set a custom suffix for both the high and low poly buttons, by default they have the standard ones used within substance painter.
+***Suffix text boxes*** - Allows you to set a custom suffix for both the high and low poly buttons, by default they have the standard ones used within substance painter.
 
 ***Make High & Make Low*** - These buttons will take the custom name in your Rename Text Box and add the corrisponding suffix to the mesh name, as well as moving the mesh onto the matching display layer, and an internal group group for other functions within the tool. If there is no name in the Rename Text Box, the mesh will just be named _high or _low based on which button you have made. 
 
