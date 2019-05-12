@@ -258,5 +258,5 @@ if __name__ == "__main__":
     except:
         pass        
         
-open_import_dialog = HighLowDialog()
-open_import_dialog.show()
+	open_import_dialog = HighLowDialog()
+	open_import_dialog.show()
