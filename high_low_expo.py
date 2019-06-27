@@ -10,7 +10,9 @@ import maya.cmds as cmds
 # Lists of objects.
 List_High = []
 List_Low = []
+Tri_List = []
 
+test = QtWidgets.QSpacerItem(0, 10)
 
 def maya_main_window():
     """
@@ -40,7 +42,7 @@ class HighLowDialog(QtWidgets.QDialog):
         super(HighLowDialog, self).__init__(parent)
         
         self.setWindowTitle("High Low Expo")
-        self.setMinimumSize(350, 350)
+        self.setMinimumSize(350, 480)
         self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
         
         self.create_widgets()
@@ -61,6 +63,9 @@ class HighLowDialog(QtWidgets.QDialog):
         self.togglel_btn = QtWidgets.QCheckBox("Hide/Show Low Poly Meshes")
         self.exporth_btn = QtWidgets.QPushButton("Export High Meshes")
         self.exportl_btn = QtWidgets.QPushButton("Export Low Meshes")
+        self.triangulate_btn = QtWidgets.QPushButton("Triangulate")
+        self.toggleT_chbx = QtWidgets.QCheckBox("Hide/Show Triangulated Meshes")
+        self.exportT_btn = QtWidgets.QPushButton("Export Triangulated Meshes")
         self.close_btn = QtWidgets.QPushButton("Close")
         self.filepath_le = QtWidgets.QLineEdit()
         self.select_file_path_btn = QtWidgets.QPushButton()
@@ -69,14 +74,19 @@ class HighLowDialog(QtWidgets.QDialog):
         
         self.layer_btn.setToolTip("Create High and Low Display Layers.")      
         self.rename_le.setToolTip("Choose a name for your mesh.")
-        self.high_btn.setToolTip("Add _high to the end of your mesh name, and assign it to the correct group.")
-        self.low_btn.setToolTip("Add _low to the end of your mesh name, and assign it to the correct group.")
+        self.high_Suffix.setToolTip("The name of the high suffix, that will be added to the end of the mesh name.")
+        self.low_Suffix.setToolTip("The name of the low suffix, that will be added to the end of the mesh name.")
+        self.high_btn.setToolTip("Add the high to the end of your mesh name, and assign it to the correct group.")
+        self.low_btn.setToolTip("Add the low suffix to the end of your mesh name, and assign it to the correct group.")
         self.addh_btn.setToolTip("Don't rename the mesh, but assign it to the correct group.")
         self.addl_btn.setToolTip("Don't rename the mesh, but assign it to the correct group.")
         self.toggleh_btn.setToolTip("Toggle the visability of the High Poly Mesh group.")
         self.togglel_btn.setToolTip("Toggle the visability of the Low Poly Mesh group.")
+        self.triangulate_btn.setToolTip("Triagulate the Low Meshes")
+        self.toggleT_chbx.setToolTip("Toggle the visability of the Triangulated Mesh group.")
         self.exporth_btn.setToolTip("Export the High Poly Mesh group.")
         self.exportl_btn.setToolTip("Export the Low Poly Mesh group.")
+        self.exportT_btn.setToolTip("Export the Triangulated Mesh group.")
         self.filepath_le.setToolTip("The location where you files will be expoerted.")  
         self.select_file_path_btn.setIcon(QtGui.QIcon(":fileOpen.png"))
         self.select_file_path_btn.setToolTip("Select export location.")    
@@ -103,6 +113,7 @@ class HighLowDialog(QtWidgets.QDialog):
         toggle_layout = QtWidgets.QVBoxLayout()
         toggle_layout.addWidget(self.toggleh_btn)
         toggle_layout.addWidget(self.togglel_btn)
+        
 
         file_path_layout = QtWidgets.QHBoxLayout()
         file_path_layout.addWidget(self.filepath_le)
@@ -111,12 +122,17 @@ class HighLowDialog(QtWidgets.QDialog):
         filename_layout = QtWidgets.QHBoxLayout()
         filename_layout.addWidget(self.set_file_name_le)
         
+        tri_layout = QtWidgets.QVBoxLayout()
+        tri_layout.addWidget(self.triangulate_btn)
+        tri_layout.addWidget(self.toggleT_chbx)
+        
         form_layout = QtWidgets.QFormLayout()
         form_layout.addRow("Rename:", rename_layout)
         form_layout.addRow("Suffixes:", suffix_layout)
         form_layout.addRow(button_layout)
         form_layout.addRow(addbtn_layout)
         form_layout.addRow("", toggle_layout)
+        form_layout.addRow("Triangulate Meshes:", tri_layout)
         form_layout.addRow("Export Location:", file_path_layout)
         form_layout.addRow("File Name:", filename_layout)
         
@@ -125,6 +141,7 @@ class HighLowDialog(QtWidgets.QDialog):
         close_layout.addStretch()
         close_layout.addWidget(self.help_btn)
         close_layout.addWidget(self.close_btn)
+        
         
         main_layout = QtWidgets.QVBoxLayout(self)
         main_layout.setSpacing(10)
@@ -136,9 +153,12 @@ class HighLowDialog(QtWidgets.QDialog):
         main_layout.addLayout(toggle_layout)
         main_layout.addLayout(file_path_layout)
         main_layout.addLayout(filename_layout)
+        main_layout.addLayout(tri_layout)
         main_layout.addLayout(form_layout)
+        main_layout.addSpacerItem(test)
         main_layout.addWidget(self.exporth_btn)
         main_layout.addWidget(self.exportl_btn)
+        main_layout.addWidget(self.exportT_btn)
         main_layout.addLayout(close_layout)
         
     
@@ -155,72 +175,109 @@ class HighLowDialog(QtWidgets.QDialog):
         self.exportl_btn.clicked.connect(self.ExportLow)
         self.help_btn.clicked.connect(self.HelpLink)
         self.close_btn.clicked.connect(self.close)
+        
+        self.triangulate_btn.clicked.connect(self.TriangulateLows)
+        self.toggleT_chbx.toggled.connect(self.T_toggle)
+        self.exportT_btn.clicked.connect(self.ExportTris)
     
     def Create_layers(self):
-        cmds.createDisplayLayer(noRecurse=True, name='Low_Poly', empty=True)
-        cmds.createDisplayLayer(noRecurse=True, name='High_Poly', empty=True)
-        return
-        
+        if cmds.objExists("Low_Poly"):
+            pass
+        elif cmds.objExists("High_Poly"):
+            pass
+        else:
+            cmds.createDisplayLayer(noRecurse=True, name='Low_Poly', empty=True)
+            cmds.createDisplayLayer(noRecurse=True, name='High_Poly', empty=True)
+
+
     def high_rename(self):
         selection = cmds.ls(sl=1, o=1)
         mesh_name = self.rename_le.text()
         high_Suf = self.high_Suffix.text()
-        if len(selection) < 1:
-            cmds.warning("No mesh selected")
-        elif len(selection) > 1:
-            cmds.warning("Too many meshes selected")
+        if self.rename_le.text() != "" and self.low_Suffix.text() != "":
+            if len(selection) < 1:
+                cmds.warning("No mesh selected")
+            elif len(selection) > 1:
+                cmds.warning("Too many meshes selected")
+            else:
+                cmds.rename(mesh_name + high_Suf)
+                Name = cmds.ls(sl=1, o=1)
+                cmds.editDisplayLayerMembers('High_Poly', Name , noRecurse=True)
+                Name = cmds.ls(sl=1, o=1)
+                Selected = Name[0]
+                if Selected in List_High:
+                    om.MGlobal.displayInfo("Already in List")
+                else:
+                    List_High.append(Selected)
+                    om.MGlobal.displayInfo("Added to List.")
         else:
-            cmds.rename(mesh_name + high_Suf)
-            Name = cmds.ls(sl=1, o=1)
-            cmds.editDisplayLayerMembers('High_Poly', Name , noRecurse=True)
-            Name = cmds.ls(sl=1, o=1)
-            Selected = Name[0]
-            List_High.append(Selected)
+            cmds.warning("No Name or Suffix")
         
     def low_rename(self):
         selection = cmds.ls(sl=1, o=1)
         mesh_name = self.rename_le.text()
         low_suf = self.low_Suffix.text()
-        if len(selection) < 1:
-            cmds.warning("No mesh selected")
-        elif len(selection) > 1:
-            cmds.warning("Too many meshes selected")
+        if self.rename_le.text() != "" and self.low_Suffix.text() != "":
+            if len(selection) < 1:
+                cmds.warning("No mesh selected")
+            elif len(selection) > 1:
+                cmds.warning("Too many meshes selected")
+            else:
+                cmds.rename(mesh_name + low_suf)
+                Name = cmds.ls(sl=1, o=1)
+                cmds.editDisplayLayerMembers('Low_Poly', Name , noRecurse=True)
+                Name = cmds.ls(sl=1, o=1)
+                Selected = Name[0]
+                if Selected in List_Low:
+                    om.MGlobal.displayInfo("Already in List")
+                else:
+                    List_Low.append(Selected)
+                    om.MGlobal.displayInfo("Added to List.")
         else:
-            cmds.rename(mesh_name + low_suf)
-            Name = cmds.ls(sl=1, o=1)
-            cmds.editDisplayLayerMembers('Low_Poly', Name , noRecurse=True)
-            Name = cmds.ls(sl=1, o=1)
-            Selected = Name[0]
-            List_Low.append(Selected)
+            cmds.warning("No Name or Suffix")
             
     def addtohigh(self):
             Name = cmds.ls(sl=1, o=1)
             cmds.editDisplayLayerMembers('High_Poly', Name , noRecurse=True)
             Name = cmds.ls(sl=1, o=1)
             Selected = Name[0]
-            List_High.append(Selected)
+            if Selected in List_High:
+                om.MGlobal.displayInfo("Already in List")
+            else:
+                List_High.append(Selected)
+                om.MGlobal.displayInfo("Added to List.")
     
     def addtolow(self):
             Name = cmds.ls(sl=1, o=1)
             cmds.editDisplayLayerMembers('Low_Poly', Name , noRecurse=True)
             Name = cmds.ls(sl=1, o=1)
             Selected = Name[0]
-            List_Low.append(Selected)
+            if Selected in List_Low:
+                om.MGlobal.displayInfo("Already in List")
+            else:
+                List_Low.append(Selected)
+                om.MGlobal.displayInfo("Added to List.")
         
             
     def H_toggle(self):
-        HV = cmds.getAttr('High_Poly.visibility')
-        if HV == 1:
-            cmds.setAttr('High_Poly.visibility', 0 )
+        if cmds.objExists("High_poly"):
+            HV = cmds.getAttr('High_Poly.visibility')
+            if HV == 1:
+                cmds.setAttr('High_Poly.visibility', 0 )
+            else:
+                cmds.setAttr('High_Poly.visibility', 1 ) 
         else:
-            cmds.setAttr('High_Poly.visibility', 1 ) 
+            pass
             
     def L_toggle(self):
-        HV = cmds.getAttr('Low_Poly.visibility')
-        if HV == 1:
-            cmds.setAttr('Low_Poly.visibility', 0 )
+        if cmds.objExists("Low_Poly"):
+            HV = cmds.getAttr('Low_Poly.visibility')
+            if HV == 1:
+                cmds.setAttr('Low_Poly.visibility', 0 )
+            else:
+                cmds.setAttr('Low_Poly.visibility', 1 ) 
         else:
-            cmds.setAttr('Low_Poly.visibility', 1 ) 
+            pass
             
     def show_file_select_dialog(self):
         file_path = QtWidgets.QFileDialog.getExistingDirectory(self, "Select Folder", "")
@@ -231,21 +288,71 @@ class HighLowDialog(QtWidgets.QDialog):
     def ExportHigh(self):
         filePath = self.filepath_le.text()
         fileName = self.set_file_name_le.text()
-        for each in List_High:
-            cmds.select(each, add=True)
-        cmds.file(filePath + "/" + fileName, es=True , pr=False, force=True, typ="FBX export")
-        cmds.select(cl=True)
-        om.MGlobal.displayInfo("Exported High Meshes")
-        
+        if filePath and fileName != "":    
+            for each in List_High:
+                cmds.select(each, add=True)
+            cmds.file(filePath + "/" + fileName, es=True , pr=False, force=True, typ="FBX export")
+            cmds.select(cl=True)
+            om.MGlobal.displayInfo("Exported High Meshes")
+        else:
+            cmds.warning("No export location selected. Or no file name chosen.")
+                    
     def ExportLow(self):
         filePath = self.filepath_le.text()
         fileName = self.set_file_name_le.text()
+        if filePath and fileName != "":  
+            for each in List_Low:
+                cmds.select(each, add=True)
+            cmds.file(filePath + "/" + fileName, es=True , pr=False, force=True, typ="FBX export")
+            cmds.select(cl=True)
+            om.MGlobal.displayInfo("Exported Low Meshes")
+        else:
+            cmds.warning("No export location selected. Or no file name chosen.")
+        
+    def TriangulateLows(self):
+        if cmds.objExists("Triangulated"):
+            pass
+        else:
+            cmds.createDisplayLayer(noRecurse=True, name='Triangulated', empty=True)
+        for each in Tri_List:
+            cmds.select(each, add=True)
+            cmds.delete()
         for each in List_Low:
             cmds.select(each, add=True)
-        cmds.file(filePath + "/" + fileName, es=True , pr=False, force=True, typ="FBX export")
-        cmds.select(cl=True)
-        om.MGlobal.displayInfo("Exported Low Meshes")
-    
+            Name = cmds.ls(sl=1, o=1)
+            Mesh = Name[0]
+            cmds.duplicate()
+            cmds.rename('Tri_' + Mesh)
+            cmds.Triangulate()
+            Tri_List.append(cmds.ls(sl=1, o=1))
+            Name = cmds.ls(sl=1, o=1)
+            Mesh = Name[0]
+            cmds.editDisplayLayerMembers('Triangulated', Name , noRecurse=True)
+            cmds.select(clear=True)
+        
+    def T_toggle(self):
+        if cmds.objExists("Triangulated"):
+            HV = cmds.getAttr('Triangulated.visibility')
+            if HV == 1:
+                cmds.setAttr('Triangulated.visibility', 0 )
+            else:
+                cmds.setAttr('Triangulated.visibility', 1 ) 
+        else:
+            pass
+            
+    def ExportTris(self):
+        filePath = self.filepath_le.text()
+        fileName = self.set_file_name_le.text()
+        if filePath and fileName != "":  
+            for each in Tri_List:
+                cmds.select(each, add=True)
+            cmds.file(filePath + "/" + fileName, es=True , pr=False, force=True, typ="FBX export")
+            cmds.select(cl=True)
+            om.MGlobal.displayInfo("Exported Triangulated Meshes")
+        else:
+            cmds.warning("No export location selected. Or no file name chosen.")
+
+
     def HelpLink(self):
         cmds.launch(web="https://github.com/mdjustin/High-Low-Expo")
         
@@ -258,5 +365,5 @@ if __name__ == "__main__":
     except:
         pass        
         
-	open_import_dialog = HighLowDialog()
-	open_import_dialog.show()
+    open_import_dialog = HighLowDialog()
+    open_import_dialog.show()
