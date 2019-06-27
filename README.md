@@ -34,13 +34,15 @@ Video demonstration : {Coming Soon}
 
 ***Set High & set Low*** - These buttons wil not rename your mesh, but will move them into the corrisponding display layer, and internal group. 
 
-***Hide/Show Low/High Poly Meshes*** - Toggling these checkboxes will let you hide and unhide your meshs that have already been sorted within the display groups. 
+***Triangulate*** - This button will triagulate the low poly list. Giving you a new list and display layer with triangulated meshes.
+
+***Hide/Show Low/High/Triangulated Poly Meshes*** - Toggling these checkboxes will let you hide and unhide your meshs that have already been sorted within the display groups. 
 
 ***Export Location*** - This will let you select the folder in which you would like to export your meshes too. 
 
 ***File Name text box*** - This lets you set a name for your file, before exporting. 
 
-***Export High/Low Meshes*** - These buttons will export the corrisponding mesh groups to the chosen folder with the chosen file name, without using the export UI. It exports your meshes as FBX format. 
+***Export High/Low/Triangulated Meshes*** - These buttons will export the corrisponding mesh groups to the chosen folder with the chosen file name, without using the export UI. It exports your meshes as FBX format. 
 
 ***Help*** - Takes you to this page. 
 
