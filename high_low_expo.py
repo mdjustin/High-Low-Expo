@@ -19,7 +19,7 @@ def maya_main_window():
     Return the Maya main window widget as a Python Object. 
     """
     main_window_prt = omui.MQtUtil.mainWindow()
-    return wrapInstance(long(main_window_prt), QtWidgets.QWidget)
+    return wrapInstance(int(main_window_prt), QtWidgets.QWidget)
     
     
 class HighLowDialog(QtWidgets.QDialog):
